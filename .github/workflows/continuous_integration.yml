@@ -26,7 +26,7 @@ jobs:
         - {
             name: "macOS",
             os: macos-latest,
-            deps_cmdline: "brew update && brew install sdl2",
+            deps_cmdline: "brew update && brew install libsdl2-dev",
             build_type: "Release"
           }
           
