@@ -20,12 +20,13 @@ jobs:
         - {
             name: "Linux",
             os: ubuntu-latest,
-            deps_cmdline: "sudo apt update && sudo apt install g++ libsdl2-dev",
+            deps_cmdline: "sudo apt update && sudo apt install libsdl2-dev",
             build_type: "Release"
           }
         - {
             name: "macOS",
             os: macos-latest,
+            deps_cmdline: "brew update && brew install sdl2",
             build_type: "Release"
           }
           
