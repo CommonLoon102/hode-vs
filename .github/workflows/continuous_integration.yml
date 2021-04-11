@@ -23,6 +23,11 @@ jobs:
             deps_cmdline: "sudo apt update && sudo apt install g++ libsdl2-dev",
             build_type: "Release"
           }
+        - {
+            name: "macOS",
+            os: macos-latest,
+            build_type: "Release"
+          }
           
     steps:
     - uses: actions/checkout@v1
@@ -53,6 +58,8 @@ jobs:
           cp ${{ matrix.config.build_type }}/hode.exe ${{ matrix.config.build_type }}/SDL2.dll ${{ matrix.config.build_type }}/getopt.dll ../hode.ini package
         elif [[ "${{ runner.os }}" == 'Linux' ]]; then
           cp hode ../hode.ini package
+        elif [[ "${{ runner.os }}" == 'macOS' ]]; then
+          cp -r hode.app ../hode.ini package
         fi
     - name: Upload Package
       uses: actions/upload-artifact@v1
