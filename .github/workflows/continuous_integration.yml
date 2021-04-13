@@ -60,7 +60,7 @@ jobs:
         elif [[ "${{ runner.os }}" == 'Linux' ]]; then
           cp hode ../hode.ini package
         elif [[ "${{ runner.os }}" == 'macOS' ]]; then
-          cp -r hode.app ../hode.ini package
+          cp hode ../hode.ini package
         fi
     - name: Upload Package
       uses: actions/upload-artifact@v1
