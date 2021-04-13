@@ -26,7 +26,7 @@ jobs:
         - {
             name: "macOS",
             os: macos-latest,
-            deps_cmdline: "brew update && brew install sdl2 make cmake && brew unlink lz4",
+            deps_cmdline: "brew upgrade && brew install sdl2",
             build_type: "Release"
           }
           
