@@ -91,6 +91,8 @@ Controls
 --------
 Currently, it is not supported to override the default controls.
 
+The default keybinds are these:
+
 |                    | Primary | Secondary |
 | ------------------ | ------- | --------- |
 | Move Andy          | Arrows  |           |
