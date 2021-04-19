@@ -85,6 +85,21 @@ Display and engine settings can be configured in the `hode.ini` file.
 
 Game progress is saved in `setup.cfg`, similar to the original engine.
 
+Playing
+=======
+Controls
+--------
+Currently, it is not supported to override the default controls.
+
+|                    | Primary | Secondary |
+| ------------------ | ------- | --------- |
+| Move Andy          | Arrows  |           |
+| Run                | Control | F         |
+| Jump               | Alt     | G         |
+| Use weapon / power | Shift   | H         |
+| Special power      | Space   | D         |
+| Skip cutscene      | Escape  |           |
+
 Credits
 =======
 All the team at Amazing Studio for possibly the best cinematic platformer ever
