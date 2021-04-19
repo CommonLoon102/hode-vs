@@ -91,7 +91,7 @@ jobs:
       - name: Upload Zipped Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.config.runtime }} ${{ matrix.config.build_type }}
+          name: ${{ matrix.config.platform }} ${{ matrix.config.build_type }}
           path: ${{ env.app_name }}-${{ matrix.config.platform }}.zip
 
       - name: List Build Directory
