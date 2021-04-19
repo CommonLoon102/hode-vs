@@ -83,9 +83,9 @@ jobs:
         run: |
           filename=${{ env.app_name }}-${{ matrix.config.platform }}
           if [[ "${{ runner.os }}" == 'Windows' ]]; then
-            7z a $filename.zip ./${{ env.package_dir }}/*
+            7z a $filename.zip ./${{ env.build_dir }}/${{ env.package_dir }}/*
           else
-            zip --junk-paths $filename ./${{ env.package_dir }}/*
+            zip --junk-paths $filename ./${{ env.build_dir }}/${{ env.package_dir }}/*
           fi
 
       - name: Upload Zipped Artifact
