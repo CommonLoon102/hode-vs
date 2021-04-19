@@ -1,0 +1,144 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  release:
+    types: [ published ]
+
+env:
+  app_name: hode
+  build_dir: build
+  package_dir: package
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }} | ${{ matrix.config.build_type }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Windows 64-bit",
+            os: windows-latest,
+            extra_options: "-A x64 -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake",
+            platform: "win-x64",
+            build_type: "Release"
+          }
+        - {
+            name: "Linux",
+            os: ubuntu-latest,
+            deps_cmdline: "sudo apt update && sudo apt install libsdl2-dev",
+            platform: "linux-x64",
+            build_type: "Release"
+          }
+        - {
+            name: "macOS",
+            os: macos-latest,
+            deps_cmdline: "brew upgrade && brew install sdl2",
+            platform: "osx-x64",
+            build_type: "Release"
+          }
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        shell: bash
+        run: |
+          git submodule update --init ./3p/inih
+          git submodule update --init ./3p/libxbr-standalone
+          if [[ ! -z "${{ matrix.config.deps_cmdline }}" ]]; then
+            eval ${{ matrix.config.deps_cmdline }}
+          fi
+          mkdir ${{ env.build_dir }}
+
+      - name: Configure
+        shell: bash
+        run: |
+          cmake -B ${{ env.build_dir }} -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} ${{ matrix.config.extra_options }} .
+
+      - name: Build
+        shell: bash
+        run: |
+          export MAKEFLAGS=--keep-going
+          cmake --build ${{ env.build_dir }} --config ${{ matrix.config.build_type }} --parallel 3
+
+      - name: Create Package
+        shell: bash
+        run: |
+          cd ${{ env.build_dir }}
+          mkdir ${{ env.package_dir }}
+          if [[ "${{ runner.os }}" == 'Windows' ]]; then
+            cp ${{ matrix.config.build_type }}/${{ env.app_name }}.exe ${{ matrix.config.build_type }}/SDL2.dll ${{ matrix.config.build_type }}/getopt.dll ../${{ env.app_name }}.ini ${{ env.package_dir }}
+          else
+            cp ${{ env.app_name }} ../${{ env.app_name }}.ini ${{ env.package_dir }}
+          fi
+
+      - name: Zip Package 
+        shell: bash
+        run: |
+            filename=${{ env.app_name }}-${{ matrix.config.platform }}
+            if [[ "${{ runner.os }}" == 'Windows' ]]; then
+              7z a $filename.zip ./${{ env.package_dir }}/*
+            else
+              zip --junk-paths $filename ./${{ env.package_dir }}/*
+            fi
+
+      - name: Upload Zipped Artifact
+      - uses: actions/upload-artifact@v2
+        with:
+            name: ${{ matrix.config.runtime }} ${{ matrix.config.build_type }}
+            path: ${{ env.app_name }}-${{ matrix.config.platform }}.zip
+
+      - name: List Build Directory
+        if: always()
+        shell: bash
+        run: |
+          git status
+          ls -lR ${{ env.build_dir }}
+
+  upload-packages:
+    needs: build
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'release' && github.event.action == 'published' && startsWith(github.ref, 'refs/tags/'))
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            platform: win-x64,
+            build_type: "Release"
+          }
+        - {
+            platform: linux-x64,
+            build_type: "Release"
+          }
+        - {
+            platform: osx-x64,
+            build_type: "Release"
+          }
+    steps:
+      - name: Get release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ matrix.config.platform }} ${{ matrix.config.build_type }}
+
+      - name:  Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: ${{ env.app_name }}-${{ matrix.config.platform }}.zip
+          asset_name: ${{ env.app_name }}-${{ matrix.config.platform }}.zip
+          asset_content_type: application/zip
