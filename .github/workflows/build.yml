@@ -81,18 +81,18 @@ jobs:
       - name: Zip Package 
         shell: bash
         run: |
-            filename=${{ env.app_name }}-${{ matrix.config.platform }}
-            if [[ "${{ runner.os }}" == 'Windows' ]]; then
-              7z a $filename.zip ./${{ env.package_dir }}/*
-            else
-              zip --junk-paths $filename ./${{ env.package_dir }}/*
-            fi
+          filename=${{ env.app_name }}-${{ matrix.config.platform }}
+          if [[ "${{ runner.os }}" == 'Windows' ]]; then
+            7z a $filename.zip ./${{ env.package_dir }}/*
+          else
+            zip --junk-paths $filename ./${{ env.package_dir }}/*
+          fi
 
       - name: Upload Zipped Artifact
-      - uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v2
         with:
-            name: ${{ matrix.config.runtime }} ${{ matrix.config.build_type }}
-            path: ${{ env.app_name }}-${{ matrix.config.platform }}.zip
+          name: ${{ matrix.config.runtime }} ${{ matrix.config.build_type }}
+          path: ${{ env.app_name }}-${{ matrix.config.platform }}.zip
 
       - name: List Build Directory
         if: always()
@@ -127,7 +127,7 @@ jobs:
         uses: bruceadams/get-release@v1.2.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
